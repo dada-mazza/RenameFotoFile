@@ -11,9 +11,16 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.TimeZone;
 import org.apache.log4j.Logger;
+
+
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.FileAttributeView;
+import java.util.Set;
 
 
 /**
@@ -29,21 +36,25 @@ public class RenameVideos {
 
         logger.info(file.getAbsolutePath());
 
+        Date date;
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(file);
             // obtain the Exif directory
             ExifSubIFDDirectory esifdd = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
             if (esifdd != null) {
                 // query the tag's value
-                Date date = esifdd.getDate(ExifSubIFDDirectory.TAG_DATETIME, TimeZone.getDefault());
-                if (date != null) {
-                    File newFile = new FileNamer().getFile(date, file);
-                    if (file.renameTo(newFile)) {
-                        logger.info(newFile.getAbsolutePath());
-                        logger.info("renamed");
-                    };
-                }
+                date = esifdd.getDate(ExifSubIFDDirectory.TAG_DATETIME, TimeZone.getDefault());
+            } else {
+                FileTime fileTime = (FileTime) Files.getAttribute(file.toPath(), "basic:lastModifiedTime");
+                date = new Date(fileTime.toMillis());              
+
             }
+
+            if (date != null) {
+                // file.renameTo(new FileNamer().getFile(date, file));
+                System.out.println("date = " + new FileNamer().getFile(date, file).getName());
+            }
+
         } catch (ImageProcessingException | IOException e) {
             //   e.printStackTrace();
             logger.error("File format is not supported: " + e.getMessage());

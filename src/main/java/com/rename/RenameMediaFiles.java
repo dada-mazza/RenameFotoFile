@@ -26,14 +26,9 @@ public class RenameMediaFiles implements Renamer {
         for (File file : imageFiles.listFiles()) {
             if (file.isFile() && !file.isHidden()) {
                 if (isImage(file)) {
-                    logger.info("image");
                     renameImages.rename(file);
-
                 } else if (isVideo(file)) {
-                    logger.info("video");
                     renameVideos.rename(file);
-                } else {
-                    logger.info("other");
                 }
             }
         }
@@ -43,7 +38,6 @@ public class RenameMediaFiles implements Renamer {
         String fileName = file.getName().toLowerCase();
         return fileName.endsWith(".jpg")
                 || fileName.endsWith(".jpeg")
-                || fileName.endsWith(".nef")
                 || fileName.endsWith(".tiff");
     }
 

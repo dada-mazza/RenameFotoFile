@@ -5,13 +5,19 @@ package com.rename;
  */
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
 
         String path = "e:\\test\\img";
 
         //String path = "h:\\!!!\\iCloud Photos\\";
+
         Renamer rename = new RenameMediaFiles();
 
         rename.renameFiles(path);
+
+
     }
+
+
 }
+
