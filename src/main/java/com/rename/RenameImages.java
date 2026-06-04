@@ -35,6 +35,7 @@ public class RenameImages {
             if (esifdd != null) {
                 // query the tag's value
                 Date date = esifdd.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED, TimeZone.getDefault());
+                System.out.println("Date -> " + date);
                 if (date != null) {
                     File newFile = new FileNamer().getFile(date, file);
                     if (file.renameTo(newFile)) {
