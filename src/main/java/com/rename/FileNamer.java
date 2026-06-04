@@ -8,7 +8,8 @@ package com.rename;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.apache.log4j.Logger;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -16,29 +17,33 @@ import org.apache.log4j.Logger;
  */
 public class FileNamer {
 
-    Logger logger = Logger.getLogger(getClass());
-
     public File getFile(Date date, File oldFile) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
         String stringDateFile = sdf.format(date);
 
+        String extension = oldFile.getName().substring(oldFile.getName().lastIndexOf(".")).toLowerCase();
+        File parent = oldFile.getParentFile();
+
+        // Names already present in the folder, without extension (e.g. "2015.05.21_0001"),
+        // so the counter is shared across every file type of the same date.
+        Set<String> takenBaseNames = new HashSet<>();
+        File[] siblings = parent == null ? null : parent.listFiles();
+        if (siblings != null) {
+            for (File sibling : siblings) {
+                String name = sibling.getName().toLowerCase();
+                int dot = name.lastIndexOf(".");
+                takenBaseNames.add(dot >= 0 ? name.substring(0, dot) : name);
+            }
+        }
+
         int counterDateFile = 1;
         String stringCounterDateFile = "%04d";
 
         while (true) {
-            String newFileName = new StringBuilder(oldFile.getParent())
-                    .append("\\")
-                    .append(stringDateFile)
-                    .append("_")
-                    .append(String.format(stringCounterDateFile, counterDateFile))
-                    .append(oldFile.getName().substring(oldFile.getName().lastIndexOf(".")))
-                    .toString().toLowerCase();
-
-            //logger.info(newFileName);
-            File newFile = new File(newFileName);
-            if (!newFile.exists()) {                
-                return newFile;
+            String baseName = stringDateFile + "_" + String.format(stringCounterDateFile, counterDateFile);
+            if (!takenBaseNames.contains(baseName)) {
+                return new File(parent, baseName + extension);
             }
             counterDateFile++;
         }

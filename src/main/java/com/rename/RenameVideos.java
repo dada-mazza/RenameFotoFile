@@ -23,9 +23,12 @@ import org.apache.log4j.Logger;
 public class RenameVideos {
 
     Logger logger = Logger.getLogger(getClass());
-    final private int DIGIT_COUNTER = 4;
 
-    public boolean rename(File file) {
+    /**
+     * Reads the capture date of a video from its EXIF metadata,
+     * or {@code null} if it is missing or the file cannot be read.
+     */
+    public Date readDate(File file) {
 
         logger.info(file.getAbsolutePath());
 
@@ -35,20 +38,13 @@ public class RenameVideos {
             ExifSubIFDDirectory esifdd = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
             if (esifdd != null) {
                 // query the tag's value
-                Date date = esifdd.getDate(ExifSubIFDDirectory.TAG_DATETIME, TimeZone.getDefault());
-                if (date != null) {
-                    File newFile = new FileNamer().getFile(date, file);
-                    if (file.renameTo(newFile)) {
-                        logger.info(newFile.getAbsolutePath());
-                        logger.info("renamed");
-                    };
-                }
+                return esifdd.getDate(ExifSubIFDDirectory.TAG_DATETIME, TimeZone.getDefault());
             }
         } catch (ImageProcessingException | IOException e) {
             //   e.printStackTrace();
             logger.error("File format is not supported: " + e.getMessage());
         }
 
-        return false;
+        return null;
     }
 }
